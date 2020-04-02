@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+</head>
+<body>
+    <form id="form" enctype="multipart/form-data" method="post" action="/test">
+        <input id="image" type="file" name="image">
+        <div>
+            リサイズ前：<br>
+            <img id="before">
+        </div>
+        <div>
+            リサイズ後：<br>
+            <img id="after">
+        </div>
+
+    </form>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jimp@0.10.0/browser/lib/jimp.min.js"></script>
+    <script>
+        $(function() {
+            $('#image').on('change', function() {
+                var file = $(this).prop('files')[0];
+                var url = URL.createObjectURL(file);
+                $('#before').attr('src', url);
+
+                Jimp.read(url).then(function(image) {
+                    image.resize(480, jimp.AUTO)
+                         .quality(80)
+                         .getBase64(Jimp.MIME_JPEG, function (err, src) {
+                             $('#after').attr('src', src);
+                         });
+                }).catch(function(err) {
+                });
+            });
+        });
+    </script>
+</body>
+</html>
