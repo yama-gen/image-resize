@@ -11,10 +11,13 @@
             <img id="before">
         </div>
         <div>
-            リサイズ後：<br>
-            <img id="after">
+            Jimpリサイズ後：<br>
+            <img id="jimp">
         </div>
-
+        <div>
+            canvasリサイズ後：<br>
+            <img id="canvas">
+        </div>
     </form>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/jimp@0.10.0/browser/lib/jimp.min.js"></script>
@@ -23,16 +26,35 @@
             $('#image').on('change', function() {
                 var file = $(this).prop('files')[0];
                 var url = URL.createObjectURL(file);
+
+                // 元画像表示
                 $('#before').attr('src', url);
 
+                // Jimpによる縮小画像表示
                 Jimp.read(url).then(function(image) {
-                    image.resize(480, jimp.AUTO)
-                         .quality(80)
+                    image.resize(600, jimp.AUTO)
+                         .quality(75)
                          .getBase64(Jimp.MIME_JPEG, function (err, src) {
-                             $('#after').attr('src', src);
+                             $('#jimp').attr('src', src);
                          });
                 }).catch(function(err) {
                 });
+
+                // canvasによる縮小画像表示
+                var reader = new FileReader();
+                var img = new Image();
+                reader.onload = function(e) {
+                    img.onload = function() {
+                        var canvas = document.createElement('canvas');
+                        canvas.width = 600;
+                        canvas.height = img.height/(img.width/600);
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        $('#canvas').attr('src', canvas.toDataURL("image/jpeg", 0.75));
+                    }
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
             });
         });
     </script>
