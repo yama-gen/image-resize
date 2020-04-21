@@ -6,6 +6,7 @@
 <body>
     <form id="form" enctype="multipart/form-data" method="post" action="/test">
         <input id="image" type="file" name="image">
+        <button type="submit" id="upload">アップロード</button>
         <div>
             リサイズ前：<br>
             <img id="before">
@@ -55,6 +56,33 @@
                     img.src = e.target.result;
                 }
                 reader.readAsDataURL(file);
+            });
+
+            $('#form').on('submit', function(event) {
+                event.preventDefault();
+
+                var file = $('#image').prop('files')[0];
+                var url = URL.createObjectURL(file);
+
+                // Jimpによる画像縮小
+                Jimp.read(url).then(function(image) {
+                    image.resize(600, jimp.AUTO)
+                        .quality(75)
+                        .getBase64(Jimp.MIME_JPEG, function (err, src) {
+                            // 縮小した画像をサーバにアップロード
+                            $.ajax({
+                                url: "/upload",
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    'image': src
+                                }
+                            }).done(function(data, textStatus, jqXHR) {
+                                $('#form').submit();
+                            }).fail(function(jqXHR, textStatus, errorThrown) {
+                            });
+                        });
+                });
             });
         });
     </script>
